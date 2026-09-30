@@ -1,0 +1,559 @@
+-- ========================================================
+-- แพนแพน Hub (Panda Theme Edition - Categorized Tabs + Fling Push)
+-- Key System + Music + Category Tabs + Fling Push + Auto Re-bind
+-- ========================================================
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local Lighting = game:GetService("Lighting")
+local SoundService = game:GetService("SoundService")
+local Camera = workspace.CurrentCamera
+
+local LocalPlayer = Players.LocalPlayer
+
+-- Global Settings
+local Settings = {
+    CorrectKey = "PANPAN2026",
+    GetKeyLink = "https://discord.gg/yourlink",
+    MusicID = "rbxassetid://1838809724",
+
+    SilentAim = false,
+    FOVRadius = 150,
+    TargetPart = "Head",
+    
+    SpeedBoost = false,
+    FastSpeed = 50,
+    NormalSpeed = 16,
+    
+    ESP = false,
+    ESPColor = Color3.fromRGB(255, 255, 255),
+
+    HitboxHead = false,
+    HitboxSize = 10,
+    OriginalHeadSize = Vector3.new(2, 1, 1),
+
+    Noclip = false,
+    BoostFPS = false,
+    FlingPush = false -- ระบบเดินชนกระเด็น
+}
+
+local PanPanImageId = "rbxassetid://YOUR_IMAGE_ID_HERE" 
+
+local DefaultLighting = {
+    FogEnd = Lighting.FogEnd,
+    GlobalShadows = Lighting.GlobalShadows,
+    Technology = Lighting.Technology
+}
+
+-- ========================================================
+-- 1. MUSIC SYSTEM
+-- ========================================================
+
+local KeyMusic = Instance.new("Sound")
+KeyMusic.Name = "KeyScreenMusic"
+KeyMusic.SoundId = Settings.MusicID
+KeyMusic.Volume = 0.6
+KeyMusic.Looped = true
+KeyMusic.Parent = SoundService
+KeyMusic:Play()
+
+-- ========================================================
+-- 2. UI CREATION (ScreenGui)
+-- ========================================================
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PanPanPandaHubGui"
+ScreenGui.ResetOnSpawn = false
+
+if syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = CoreGui
+else
+    local function ParentGui()
+        local playerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
+        if playerGui then ScreenGui.Parent = playerGui end
+    end
+    ParentGui()
+    LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        ParentGui()
+    end)
+end
+
+-- ========================================================
+-- 3. KEY SYSTEM UI
+-- ========================================================
+
+local KeyFrame = Instance.new("Frame")
+KeyFrame.Name = "KeyFrame"
+KeyFrame.Size = UDim2.new(0, 300, 0, 220)
+KeyFrame.Position = UDim2.new(0.5, -150, 0.5, -110)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+KeyFrame.Active = true
+KeyFrame.Draggable = true
+KeyFrame.Parent = ScreenGui
+
+local UICornerKey = Instance.new("UICorner")
+UICornerKey.CornerRadius = UDim.new(0, 16)
+UICornerKey.Parent = KeyFrame
+
+local UIStrokeKey = Instance.new("UIStroke")
+UIStrokeKey.Color = Color3.fromRGB(240, 240, 240)
+UIStrokeKey.Thickness = 2
+UIStrokeKey.Parent = KeyFrame
+
+local KeyTitle = Instance.new("TextLabel")
+KeyTitle.Size = UDim2.new(1, 0, 0, 40)
+KeyTitle.Position = UDim2.new(0, 0, 0, 10)
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "🐼 Key System - แพนแพน Hub 🐼"
+KeyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyTitle.TextSize = 16
+KeyTitle.Font = Enum.Font.FredokaOne
+KeyTitle.Parent = KeyFrame
+
+local KeyTextBox = Instance.new("TextBox")
+KeyTextBox.Size = UDim2.new(0.85, 0, 0, 40)
+KeyTextBox.Position = UDim2.new(0.075, 0, 0, 60)
+KeyTextBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+KeyTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyTextBox.PlaceholderText = "กรุณาใส่ Key ที่นี่..."
+KeyTextBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 140)
+KeyTextBox.Text = ""
+KeyTextBox.TextSize = 14
+KeyTextBox.Font = Enum.Font.SourceSansBold
+KeyTextBox.Parent = KeyFrame
+
+local UICornerInput = Instance.new("UICorner")
+UICornerInput.CornerRadius = UDim.new(0, 10)
+UICornerInput.Parent = KeyTextBox
+
+local CheckKeyBtn = Instance.new("TextButton")
+CheckKeyBtn.Size = UDim2.new(0.4, 0, 0, 40)
+CheckKeyBtn.Position = UDim2.new(0.075, 0, 0, 115)
+CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+CheckKeyBtn.TextColor3 = Color3.fromRGB(15, 15, 15)
+CheckKeyBtn.Text = "ยืนยัน Key"
+CheckKeyBtn.TextSize = 14
+CheckKeyBtn.Font = Enum.Font.SourceSansBold
+CheckKeyBtn.Parent = KeyFrame
+
+local UICornerCheck = Instance.new("UICorner")
+UICornerCheck.CornerRadius = UDim.new(0, 10)
+UICornerCheck.Parent = CheckKeyBtn
+
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.Size = UDim2.new(0.4, 0, 0, 40)
+GetKeyBtn.Position = UDim2.new(0.525, 0, 0, 115)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+GetKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+GetKeyBtn.Text = "รับ Key"
+GetKeyBtn.TextSize = 14
+GetKeyBtn.Font = Enum.Font.SourceSansBold
+GetKeyBtn.Parent = KeyFrame
+
+local UICornerGet = Instance.new("UICorner")
+UICornerGet.CornerRadius = UDim.new(0, 10)
+UICornerGet.Parent = GetKeyBtn
+
+local KeyStatus = Instance.new("TextLabel")
+KeyStatus.Size = UDim2.new(1, 0, 0, 30)
+KeyStatus.Position = UDim2.new(0, 0, 0, 170)
+KeyStatus.BackgroundTransparency = 1
+KeyStatus.Text = "🎵 Playing: Falling Tears - Slowed"
+KeyStatus.TextColor3 = Color3.fromRGB(180, 180, 180)
+KeyStatus.TextSize = 12
+KeyStatus.Font = Enum.Font.SourceSans
+KeyStatus.Parent = KeyFrame
+
+-- ==========================================================
+-- 4. MAIN HUB UI WITH TABS
+-- ==========================================================
+
+local OpenBtn = Instance.new("ImageButton")
+OpenBtn.Size = UDim2.new(0, 55, 0, 55)
+OpenBtn.Position = UDim2.new(0, 15, 0.4, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+OpenBtn.Image = PanPanImageId
+OpenBtn.Active = true
+OpenBtn.Draggable = true
+OpenBtn.Visible = false
+OpenBtn.Parent = ScreenGui
+
+local UICornerBtn = Instance.new("UICorner")
+UICornerBtn.CornerRadius = UDim.new(1, 0)
+UICornerBtn.Parent = OpenBtn
+
+local UIStrokeBtn = Instance.new("UIStroke")
+UIStrokeBtn.Color = Color3.fromRGB(240, 240, 240)
+UIStrokeBtn.Thickness = 2
+UIStrokeBtn.Parent = OpenBtn
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 280, 0, 360)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -180)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+MainFrame.Visible = false
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local UICornerFrame = Instance.new("UICorner")
+UICornerFrame.CornerRadius = UDim.new(0, 16)
+UICornerFrame.Parent = MainFrame
+
+local UIStrokeFrame = Instance.new("UIStroke")
+UIStrokeFrame.Color = Color3.fromRGB(220, 220, 220)
+UIStrokeFrame.Thickness = 2.5
+UIStrokeFrame.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "🐼 แพนแพน Hub 🐼"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18
+Title.Font = Enum.Font.FredokaOne
+Title.Parent = MainFrame
+
+-- Tab Navigation Frame
+local TabNavFrame = Instance.new("Frame")
+TabNavFrame.Size = UDim2.new(0.9, 0, 0, 35)
+TabNavFrame.Position = UDim2.new(0.05, 0, 0, 50)
+TabNavFrame.BackgroundTransparency = 1
+TabNavFrame.Parent = MainFrame
+
+local TabButtons = {}
+local TabFrames = {}
+
+local Categories = {"Main", "Player", "Visual"}
+
+local function SwitchTab(selectedCategory)
+    for name, frame in pairs(TabFrames) do
+        frame.Visible = (name == selectedCategory)
+    end
+    for name, btn in pairs(TabButtons) do
+        if name == selectedCategory then
+            btn.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+            btn.TextColor3 = Color3.fromRGB(15, 15, 15)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+        end
+    end
+end
+
+for i, catName in ipairs(Categories) do
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Size = UDim2.new(0.31, 0, 1, 0)
+    TabBtn.Position = UDim2.new((i - 1) * 0.345, 0, 0, 0)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    TabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    TabBtn.Text = catName
+    TabBtn.TextSize = 13
+    TabBtn.Font = Enum.Font.SourceSansBold
+    TabBtn.Parent = TabNavFrame
+
+    local UICornerTab = Instance.new("UICorner")
+    UICornerTab.CornerRadius = UDim.new(0, 8)
+    UICornerTab.Parent = TabBtn
+
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Name = catName .. "Frame"
+    ContentFrame.Size = UDim2.new(0.9, 0, 0, 250)
+    ContentFrame.Position = UDim2.new(0.05, 0, 0, 95)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.Visible = false
+    ContentFrame.Parent = MainFrame
+
+    TabButtons[catName] = TabBtn
+    TabFrames[catName] = ContentFrame
+
+    TabBtn.MouseButton1Click:Connect(function()
+        SwitchTab(catName)
+    end)
+end
+
+local function CreateToggleButton(parentFrame, text, posY, callback)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(1, 0, 0, 40)
+    Btn.Position = UDim2.new(0, 0, 0, posY)
+    Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Btn.Text = text .. ": OFF"
+    Btn.TextSize = 14
+    Btn.Font = Enum.Font.SourceSansBold
+    Btn.Parent = parentFrame
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 10)
+    Corner.Parent = Btn
+
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = Color3.fromRGB(60, 60, 60)
+    BtnStroke.Thickness = 1
+    BtnStroke.Parent = Btn
+
+    local state = false
+    Btn.MouseButton1Click:Connect(function()
+        state = not state
+        if state then
+            Btn.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+            Btn.TextColor3 = Color3.fromRGB(15, 15, 15)
+            Btn.Text = text .. ": ON"
+            BtnStroke.Color = Color3.fromRGB(255, 255, 255)
+        else
+            Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            Btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+            Btn.Text = text .. ": OFF"
+            BtnStroke.Color = Color3.fromRGB(60, 60, 60)
+        end
+        callback(state)
+    end)
+    return Btn
+end
+
+OpenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- ==========================================================
+-- 5. CONTENT IMPLEMENTATION BY CATEGORY
+-- ==========================================================
+
+-- [ หมวด 1: Main (Silent Aim & Hitbox) ]
+CreateToggleButton(TabFrames["Main"], "Silent Aim", 10, function(state)
+    Settings.SilentAim = state
+end)
+
+CreateToggleButton(TabFrames["Main"], "Hitbox Head", 60, function(state)
+    Settings.HitboxHead = state
+    if not state then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                local head = plr.Character.Head
+                head.Size = Settings.OriginalHeadSize
+                head.Transparency = 0
+                head.CanCollide = true
+            end
+        end
+    end
+end)
+
+local AdjustFrame = Instance.new("Frame")
+AdjustFrame.Size = UDim2.new(1, 0, 0, 40)
+AdjustFrame.Position = UDim2.new(0, 0, 0, 110)
+AdjustFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+AdjustFrame.Parent = TabFrames["Main"]
+
+local UICornerAdjust = Instance.new("UICorner")
+UICornerAdjust.CornerRadius = UDim.new(0, 10)
+UICornerAdjust.Parent = AdjustFrame
+
+local MinusBtn = Instance.new("TextButton")
+MinusBtn.Size = UDim2.new(0.25, 0, 1, 0)
+MinusBtn.BackgroundTransparency = 1
+MinusBtn.Text = "-"
+MinusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinusBtn.TextSize = 22
+MinusBtn.Font = Enum.Font.SourceSansBold
+MinusBtn.Parent = AdjustFrame
+
+local PlusBtn = Instance.new("TextButton")
+PlusBtn.Size = UDim2.new(0.25, 0, 1, 0)
+PlusBtn.Position = UDim2.new(0.75, 0, 0, 0)
+PlusBtn.BackgroundTransparency = 1
+PlusBtn.Text = "+"
+PlusBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlusBtn.TextSize = 22
+PlusBtn.Font = Enum.Font.SourceSansBold
+PlusBtn.Parent = AdjustFrame
+
+local SizeLabel = Instance.new("TextLabel")
+SizeLabel.Size = UDim2.new(0.5, 0, 1, 0)
+SizeLabel.Position = UDim2.new(0.25, 0, 0, 0)
+SizeLabel.BackgroundTransparency = 1
+SizeLabel.Text = "Size: " .. tostring(Settings.HitboxSize)
+SizeLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+SizeLabel.TextSize = 14
+SizeLabel.Font = Enum.Font.SourceSansBold
+SizeLabel.Parent = AdjustFrame
+
+MinusBtn.MouseButton1Click:Connect(function()
+    if Settings.HitboxSize > 2 then
+        Settings.HitboxSize = Settings.HitboxSize - 2
+        SizeLabel.Text = "Size: " .. tostring(Settings.HitboxSize)
+    end
+end)
+
+PlusBtn.MouseButton1Click:Connect(function()
+    if Settings.HitboxSize < 50 then
+        Settings.HitboxSize = Settings.HitboxSize + 2
+        SizeLabel.Text = "Size: " .. tostring(Settings.HitboxSize)
+    end
+end)
+
+-- [ หมวด 2: Player (Speed, Noclip & Fling Push) ]
+CreateToggleButton(TabFrames["Player"], "Speed Boost", 10, function(state)
+    Settings.SpeedBoost = state
+    local char = LocalPlayer.Character
+    if char and char:FindFirstChild("Humanoid") then
+        char.Humanoid.WalkSpeed = state and Settings.FastSpeed or Settings.NormalSpeed
+    end
+end)
+
+CreateToggleButton(TabFrames["Player"], "Noclip", 60, function(state)
+    Settings.Noclip = state
+end)
+
+-- เพิ่มปุ่ม Fling Push (เดินชนกระเด็น) ในหมวด Player
+CreateToggleButton(TabFrames["Player"], "Fling Push (ชนกระเด็น)", 110, function(state)
+    Settings.FlingPush = state
+end)
+
+-- [ หมวด 3: Visual (ESP & Boost FPS) ]
+CreateToggleButton(TabFrames["Visual"], "ESP Box", 10, function(state)
+    Settings.ESP = state
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("ESP_Highlight") then
+            plr.Character.ESP_Highlight.Enabled = state
+        end
+    end
+end)
+
+CreateToggleButton(TabFrames["Visual"], "Boost FPS", 60, function(state)
+    Settings.BoostFPS = state
+    if state then
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 9e9
+        for _, effect in ipairs(Lighting:GetChildren()) do
+            if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") then
+                effect.Enabled = false
+            end
+        end
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") and not v:IsDescendantOf(LocalPlayer.Character) then
+                v.Material = Enum.Material.SmoothPlastic
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v.Transparency = 1
+            end
+        end
+    else
+        Lighting.GlobalShadows = DefaultLighting.GlobalShadows
+        Lighting.FogEnd = DefaultLighting.FogEnd
+        for _, effect in ipairs(Lighting:GetChildren()) do
+            if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") then
+                effect.Enabled = true
+            end
+        end
+    end
+end)
+
+SwitchTab("Main")
+
+-- ==========================================================
+-- 6. KEY CHECK LOGIC
+-- ==========================================================
+
+CheckKeyBtn.MouseButton1Click:Connect(function()
+    if KeyTextBox.Text == Settings.CorrectKey then
+        KeyStatus.Text = "Key ถูกต้อง! กำลังปลดล็อก..."
+        KeyStatus.TextColor3 = Color3.fromRGB(100, 255, 100)
+        
+        if KeyMusic then
+            KeyMusic:Stop()
+            KeyMusic:Destroy()
+        end
+        
+        task.wait(1)
+        KeyFrame:Destroy()
+        OpenBtn.Visible = true
+        MainFrame.Visible = true
+    else
+        KeyStatus.Text = "Key ไม่ถูกต้อง กรุณาลองใหม่!"
+        KeyStatus.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+end)
+
+GetKeyBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard(Settings.GetKeyLink)
+        KeyStatus.Text = "คัดลอกลิงก์รับ Key เรียบร้อยแล้ว!"
+        KeyStatus.TextColor3 = Color3.fromRGB(255, 220, 100)
+    else
+        KeyStatus.Text = "ไม่สามารถคัดลอกได้ (ไม่รองรับ Clipboard)"
+        KeyStatus.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+end)
+
+-- ==========================================================
+-- 7. SYSTEM FUNCTIONS & LOOPS (FLING LOGIC)
+-- ==========================================================
+
+RunService.Stepped:Connect(function()
+    local char = LocalPlayer.Character
+
+    if Settings.SpeedBoost and char and char:FindFirstChild("Humanoid") then
+        if char.Humanoid.WalkSpeed ~= Settings.FastSpeed then
+            char.Humanoid.WalkSpeed = Settings.FastSpeed
+        end
+    end
+
+    if Settings.Noclip and char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+
+    if Settings.HitboxHead then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                local head = plr.Character.Head
+                head.Size = Vector3.new(Settings.HitboxSize, Settings.HitboxSize, Settings.HitboxSize)
+                head.Transparency = 0.6
+                head.CanCollide = false
+            end
+        end
+    end
+
+    -- ระบบ Fling Push (เดินชนแล้วกระเด็น)
+    if Settings.FlingPush and char and char:FindFirstChild("HumanoidRootPart") then
+        local hrp = char.HumanoidRootPart
+        local oldVelocity = hrp.Velocity
+        
+        -- สลับค่า Velocity ความเร็วสูงถี่ๆ เพื่อเพิ่มแรงปะทะทางฟิสิกส์
+        hrp.Velocity = Vector3.new(10000, 10000, 10000)
+        RunService.RenderStepped:Wait()
+        hrp.Velocity = oldVelocity
+    end
+end)
+
+local function ApplyESP(plr)
+    if plr == LocalPlayer then return end
+    
+    local function AddHighlight(char)
+        if not char then return end
+        local highlight = char:FindFirstChild("ESP_Highlight") or Instance.new("Highlight")
+        highlight.Name = "ESP_Highlight"
+        highlight.Adornee = char
+        highlight.FillColor = Settings.ESPColor
+        highlight.OutlineColor = Settings.ESPColor
+        highlight.FillTransparency = 0.5
+        highlight.OutlineTransparency = 0
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.Enabled = Settings.ESP
+        highlight.Parent = char
+    end
+
+    plr.CharacterAdded:Connect(AddHighlight)
+    if plr.Character then AddHighlight(plr.Character) end
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do ApplyESP(plr) end
+Players.PlayerAdded:Connect(ApplyESP)
